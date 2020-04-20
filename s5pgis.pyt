@@ -1,7 +1,8 @@
 # -----------------------------------------------
-# Project: arcgis-s5p-tool
+# Project: arcgis-s5p
 # Name: s5pgis
 # Purpose: Converts Sentinel 5-P netCDF data to point Feature Class
+# Version: 0.1
 # Author: James M Roden
 # Created: Apr 2020
 # ArcGIS Version: 10.5
@@ -129,7 +130,15 @@ class Tool(object):
             struct = np.rec.fromarrays([longitude, latitude, data_value], formats=['f8', 'f8', 'f8'],
                                        names=['longitude', 'latitude', variable])
 
-            arcpy.da.NumPyArrayToFeatureClass(struct, out_points, ['longitude', 'latitude'])
+            wkt = "GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],\
+                           PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]];\
+                           -400 -400 1000000000;-100000 10000;-100000 10000;8.98315284119522E-09;\
+                           0.001;0.001;IsHighPrecision"
+
+            sr = arcpy.SpatialReference()
+            sr.loadFromString(wkt)
+
+            arcpy.da.NumPyArrayToFeatureClass(struct, out_points, ['longitude', 'latitude'], sr)
 
         except RuntimeError:
             arcpy.AddError('Please ensure you are using Sentinel 5-P L2 ch4 data in original netCDF format')
